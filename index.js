@@ -1,6 +1,5 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 
 require("dotenv").config();
@@ -14,13 +13,11 @@ const feedRouter = require("./routes/feed");
 const port = process.env.PORT || 8080;
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 app.use(cors());
-
-app.use("/images", express.static("images"));
 
 mongoose
   .connect(process.env.MONGODB_URL_LOCAL)
@@ -34,6 +31,7 @@ mongoose
     err.messege = `err db`;
     console.log(err);
   });
+app.use("/images", express.static("images"));
 app.use("/feed", feedRouter);
 app.use(notFoundErrorHandler);
 app.use(serverErrorHandler);

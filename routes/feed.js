@@ -1,32 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { body } = require("express-validator");
-const multer = require("multer");
-// const upload = multer({ dest: "./images" });
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./images");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-function fileFilter(req, file, cb) {
-  if (
-    file.mimetype == "image/jpeg" ||
-    file.mimetype == "image/jpg" ||
-    file.mimetype == "image/png"
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-}
-
-const upload = multer({ storage: storage, fileFilter: fileFilter });
-
-const { getPosts, postPosts } = require("../controllers/feed");
+const upload = require("../controllers/multer");
+const {
+  postPosts,
+  getPosts,
+  getPostDetails,
+  editPost,
+  deletePost,
+} = require("../controllers/feed");
+const { postValidator } = require("../middlewares/validators");
 
 // const jsonParser = bodyParser.json();
 // const urlencodedParser = bodyParser.urlencoded({ extended: false });
@@ -37,18 +20,17 @@ const router = express.Router();
 //    /feed/posts
 router.get("/posts", getPosts);
 
+router.get("/posts/:postId", getPostDetails);
+
 //Post
 //    /feed/posts
-router.post(
-  "/posts",
-  upload.single("image"),
+//arrangement of middlewares   multer(as it parses the multipart/data form) before validator otherwise cause error
+router.post("/posts", upload.single("image"), postValidator(), postPosts);
 
-  //   body("title")
-  //     .trim()
-  //     .isLength({ min: 5 })
-  //     .withMessage("title length should be 5 "),
-  //   jsonParser,
-  postPosts
-);
+//PUT
+router.put("/posts/:postId", upload.single("image"), postValidator(), editPost);
+
+//DELETE
+router.delete("/posts/:postId", deletePost);
 
 module.exports = router;
