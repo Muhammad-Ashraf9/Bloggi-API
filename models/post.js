@@ -9,4 +9,4 @@ const postSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = model("post", postSchema);
+module.exports = model("Post", postSchema);

@@ -49,15 +49,15 @@ exports.getPostDetails = async (req, res, next) => {
 
 //POST
 exports.postPosts = async (req, res, next) => {
-  const vlaidatedResultOfRequest = validationResult(req);
+  const validatedResultOfRequest = validationResult(req);
   const { title, content, author } = req.body;
   const imageUrl = req.file?.path;
   try {
-    if (!vlaidatedResultOfRequest.isEmpty()) {
-      removeFile(getImageFullPath(req.file.filename));
-      return res.status(403).json({ errors: vlaidatedResultOfRequest.array() });
-    }
     if (!imageUrl) return res.status(403).json({ error: "No image uploaded" });
+    if (!validatedResultOfRequest.isEmpty()) {
+      removeFile(getImageFullPath(req.file.filename));
+      return res.status(403).json({ errors: validatedResultOfRequest.array() });
+    }
     const post = new Post({
       title: title,
       content: content,
@@ -80,7 +80,6 @@ exports.editPost = async (req, res, next) => {
   const { postId } = req.params;
   const { title, content, author } = req.body;
   const image = req.file;
-  console.log(image);
   try {
     const foundPost = await Post.findById(postId);
     const imageUrl = image?.path || foundPost.imageUrl;

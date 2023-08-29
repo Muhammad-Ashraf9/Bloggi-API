@@ -10,12 +10,11 @@ const {
 } = require("./controllers/error");
 
 const feedRouter = require("./routes/feed");
+const authRoutes = require("./routes/auth");
+
 const port = process.env.PORT || 8080;
 
 const app = express();
-// app.use(bodyParser.urlencoded({ extended: false }));
-
-// app.use(bodyParser.json());
 
 app.use(cors());
 
@@ -33,5 +32,6 @@ mongoose
   });
 app.use("/images", express.static("images"));
 app.use("/feed", feedRouter);
+app.use(authRoutes);
 app.use(notFoundErrorHandler);
 app.use(serverErrorHandler);
