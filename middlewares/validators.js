@@ -6,10 +6,6 @@ exports.postValidator = () => [
     .trim()
     .isLength({ min: 6 })
     .withMessage("title length should be 6 "),
-  body("author")
-    .trim()
-    .isLength({ min: 6 })
-    .withMessage("author length should be 6 "),
   body("content")
     .trim()
     .isLength({ min: 6 })

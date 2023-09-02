@@ -14,13 +14,6 @@ const getJWT = function (data) {
     throw error;
   }
 };
-const verifyJWT = function (token) {
-  try {
-    return jwt.verify(token, process.env.TOKEN_SECRET);
-  } catch (error) {
-    throw error;
-  }
-};
 exports.postSignup = async (req, res, next) => {
   const validatedResultOfRequest = validationResult(req);
 
@@ -54,28 +47,10 @@ exports.postSignin = async (req, res, next) => {
     if (!isPasswordMatch) throw Error("Wrong Password.");
 
     const token = getJWT({ email: user.email, id: user._id });
-    user.token = token;
-    const savedUser = await user.save();
     res
       .status(200)
-      .json({ message: "logged in successfully.", token: savedUser.token });
+      .json({ message: "logged in successfully.", token, id: user._id });
   } catch (error) {
-    next(error);
-  }
-};
-exports.isAuth = async (req, res, next) => {
-  try {
-    const token = req.get("Authorization");
-    if (!token) throw Error("No Token found.");
-    const decodedToken = verifyJWT(token);
-    console.log("decodedToken :>> ", decodedToken);
-    const { email } = decodedToken;
-    const user = await User.findOne({ email: email });
-    if (!user) throw Error("Invalid Token");
-    req.user = user;
-    next();
-  } catch (error) {
-    error.statusCode = 403;
     next(error);
   }
 };

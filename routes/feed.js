@@ -10,7 +10,7 @@ const {
   deletePost,
 } = require("../controllers/feed");
 const { postValidator } = require("../middlewares/validators");
-const { isAuth } = require("../controllers/auth");
+const { isAuth } = require("../middlewares/isAuth");
 
 // const jsonParser = bodyParser.json();
 // const urlencodedParser = bodyParser.urlencoded({ extended: false });
@@ -26,12 +26,24 @@ router.get("/posts/:postId", isAuth, getPostDetails);
 //Post
 //    /feed/posts
 //arrangement of middlewares   multer(as it parses the multipart/data form) before validator otherwise cause error
-router.post("/posts", upload.single("image"), postValidator(), postPosts);
+router.post(
+  "/posts",
+  isAuth,
+  upload.single("image"),
+  postValidator(),
+  postPosts
+);
 
 //PUT
-router.put("/posts/:postId", upload.single("image"), postValidator(), editPost);
+router.put(
+  "/posts/:postId",
+  isAuth,
+  upload.single("image"),
+  postValidator(),
+  editPost
+);
 
 //DELETE
-router.delete("/posts/:postId", deletePost);
+router.delete("/posts/:postId", isAuth, deletePost);
 
 module.exports = router;
