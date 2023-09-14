@@ -6,7 +6,7 @@ const {
   postPosts,
   getPosts,
   getPostDetails,
-  editPost,
+  updatePost,
   deletePost,
 } = require("../controllers/feed");
 const { postValidator } = require("../middlewares/validators");
@@ -40,7 +40,7 @@ router.put(
   isAuth,
   upload.single("image"),
   postValidator(),
-  editPost
+  updatePost
 );
 
 //DELETE

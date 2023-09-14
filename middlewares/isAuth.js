@@ -13,7 +13,6 @@ exports.isAuth = async (req, res, next) => {
     const token = req.get("Authorization");
     if (!token) throw Error("No Token found.");
     const decodedToken = verifyJWT(token);
-    console.log("decodedToken :>> ", decodedToken);
     const { id } = decodedToken;
 
     req.userId = id;

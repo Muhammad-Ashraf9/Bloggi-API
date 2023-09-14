@@ -3,6 +3,7 @@ const Post = require("../models/post");
 const fs = require("fs");
 const path = require("path");
 const User = require("../models/user");
+const io = require("../socket");
 function removeFile(path) {
   fs.unlink(path, (err) => {
     if (err) throw err;
@@ -21,9 +22,10 @@ exports.getPosts = async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const posts = await Post.find({ ...req.query })
-      .limit(limit * 1)
+      .populate("author")
+      .sort({ createdAt: -1 }) // We sort the data by the date of their creation in descending order
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 }); // We sort the data by the date of their creation in descending order
+      .limit(limit * 1);
 
     const count = await Post.countDocuments();
     return res.status(200).json({
@@ -76,6 +78,7 @@ exports.postPosts = async (req, res, next) => {
       await Post.findByIdAndDelete(savedPost._id);
       throw Error("Could't save post,");
     }
+    io.getIo().emit("posts", { action: "Create", post: savedPost, author });
     res.status(201).json({
       post: savedPost,
     });
@@ -85,14 +88,14 @@ exports.postPosts = async (req, res, next) => {
 };
 
 //PUT
-exports.editPost = async (req, res, next) => {
+exports.updatePost = async (req, res, next) => {
   const { postId } = req.params;
   const { title, content, author } = req.body;
   const image = req.file;
   try {
-    const foundPost = await Post.findById(postId);
+    const foundPost = await Post.findById(postId).populate("author");
     if (!foundPost) throw new Error("Post Not Found.");
-    if (foundPost.author.toString() !== req.userId.toString()) {
+    if (foundPost.author._id.toString() !== req.userId.toString()) {
       image && removeFile(image.path);
       throw new Error("Not Authorized to update post.");
     }
@@ -108,6 +111,12 @@ exports.editPost = async (req, res, next) => {
       { new: true }
     );
     if (image) removeFile(foundPost.imageUrl);
+    io.getIo().emit("posts", {
+      action: "Update",
+      post: updatedPost,
+      author: foundPost.author,
+    });
+
     return res.status(200).json({ updatedPost });
   } catch (error) {
     next(error);
@@ -129,7 +138,11 @@ exports.deletePost = async (req, res, next) => {
     if (!savedUser || !deletedPost) throw new Error("Couldn't delete post");
     //add post again if user not saved
     removeFile(deletedPost.imageUrl);
-    return res.status(200).json({ deletedPost });
+    io.getIo().emit("posts", {
+      action: "Delete",
+      post: deletedPost,
+    });
+    res.status(200).json({ deletedPost });
   } catch (error) {
     next(error);
   }
