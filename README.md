@@ -1,5 +1,5 @@
 # Bloggi-API
-- 
+- Bloggi is a RESTful API that provides full CRUD operations for blog posts and allows real-time post updates using websockets. Developers can easily integrate Bloggi into applications to enable creating, reading, updating, and deleting blog content.
 ## Features
 - RESTful API endpoints enabling CRUD operations on blog posts
 - JWT and bcrypt for authentication and security of API access
